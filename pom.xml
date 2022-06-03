@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.au.code</groupId>
-	<artifactId>imbd-api-exproler</artifactId>
+	<artifactId>imdb-api-explorer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>imbd-api-exproler</name>
+	<name>imdb-api-explorer</name>
 	<description>Query IMDB API</description>
 
 	<properties>
