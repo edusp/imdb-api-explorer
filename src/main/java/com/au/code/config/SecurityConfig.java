@@ -1,41 +1,49 @@
 package com.au.code.config;
 
-import com.au.code.service.security.AuthUserDetailsService;
+import com.au.code.service.UserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
-import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-@EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
+@RequiredArgsConstructor
+@EnableWebSecurity
 @Configuration
-public class SecurityConfig {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+  private static final String ADMIN = "ADMIN";
+  private final UserDetailsService authService;
 
-  @Bean
-  public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-    return http
-            .csrf().disable()
-            .authorizeExchange()
-              .pathMatchers(HttpMethod.POST).hasRole("ADMIN")
-              .pathMatchers(HttpMethod.PUT).hasRole("ADMIN")
-              .pathMatchers(HttpMethod.GET, "/actuator/**").hasRole("ADMIN")
-            .pathMatchers("/movies/**").permitAll()
-            .anyExchange().authenticated()
+  @Override
+  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    auth.userDetailsService(authService);
+  }
+
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http.csrf().disable();
+    http.authorizeHttpRequests()
+            .antMatchers("/actuator/**", "/users/**").hasRole(ADMIN)
+            .antMatchers("/users/**").hasRole(ADMIN)
+            .antMatchers(HttpMethod.POST).hasRole(ADMIN)
+            .antMatchers(HttpMethod.PUT).hasRole(ADMIN)
+
+            .antMatchers("/movies/**").permitAll()
+
+            .anyRequest().authenticated()
             .and()
-              .httpBasic()
-            .and()
-              .build();
+            .httpBasic();
   }
 
   @Bean
-  public ReactiveAuthenticationManager authenticationManager(AuthUserDetailsService userDetailsService) {
-    return new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService);
+  public PasswordEncoder passwordEncoder() {
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
   }
 
 }
