@@ -1,6 +1,7 @@
 package com.au.code.config;
 
-import com.au.code.service.UserDetailsService;
+import com.au.code.exception.custom.CustomAccessDeniedExceptionHandler;
+import com.au.code.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -18,7 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   private static final String ADMIN = "ADMIN";
-  private final UserDetailsService authService;
+  private final UserService authService;
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -30,7 +32,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     http.csrf().disable();
     http.authorizeHttpRequests()
             .antMatchers("/actuator/**", "/users/**").hasRole(ADMIN)
-            .antMatchers("/users/**").hasRole(ADMIN)
             .antMatchers(HttpMethod.POST).hasRole(ADMIN)
             .antMatchers(HttpMethod.PUT).hasRole(ADMIN)
 
@@ -38,12 +39,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
             .anyRequest().authenticated()
             .and()
-            .httpBasic();
+            .httpBasic()
+
+            .and()
+            .exceptionHandling().accessDeniedHandler(accessDeniedHandler());
   }
 
   @Bean
   public PasswordEncoder passwordEncoder() {
     return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+  }
+
+
+  @Bean
+  public AccessDeniedHandler accessDeniedHandler(){
+    return new CustomAccessDeniedExceptionHandler();
   }
 
 }
