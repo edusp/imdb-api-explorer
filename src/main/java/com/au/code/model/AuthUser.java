@@ -67,7 +67,7 @@ public class AuthUser implements UserDetails {
   }
 
   public UserRecord mapToRecord() {
-    return new UserRecord(this.getUsername(), this.getPassword(), this.getRoles(), this.isActive());
+    return new UserRecord(this.getUsername(), this.getRoles(), this.isActive());
   }
 
   @Override

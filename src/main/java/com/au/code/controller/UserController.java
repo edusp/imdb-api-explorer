@@ -1,7 +1,7 @@
 package com.au.code.controller;
 
 import com.au.code.dto.UserRecord;
-import com.au.code.service.UserDetailsService;
+import com.au.code.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("users")
 public class UserController {
 
-  private final UserDetailsService service;
+  private final UserService service;
 
   @PostMapping
   @ResponseBody
